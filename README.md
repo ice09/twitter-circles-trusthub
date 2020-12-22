@@ -1,8 +1,10 @@
 # Circles-Twitter-Trusthub
 
-_Do not use this code in production (Mainnet) or any public testnets if you don't want your Excel data to be publicly readable by everyone! This is solely for training purposes._
+Implements a Circles account which gives trust to Circles users associated with verified Twitter accounts.
 
-![Integration overview](docs/img/overview.png)
+More info about the objective: ...
+
+![Integration overview](docs/img/Circles-Twitter-Trusthub.png)
 
 # Prerequisites
 

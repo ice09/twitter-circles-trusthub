@@ -10,9 +10,9 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.DefaultGasProvider;
+import tech.blockchainers.GnosisSafe;
 import tech.blockchainers.Hub;
 
-import java.security.Security;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -27,6 +27,9 @@ public class ApplicationConfiguration {
     @Value("${trusthub.contract.address}")
     private String contractAddress;
 
+    @Value("${circles.hub.address}")
+    private String hubAddress;
+
     @Bean
     public Web3j web3j() {
         return Web3j.build(new HttpService(ethereumRpcUrl, createOkHttpClient()));
@@ -34,10 +37,19 @@ public class ApplicationConfiguration {
 
     @Bean
     public Hub createTrustHubProxy() throws Exception {
-        if (StringUtils.isNotEmpty(contractAddress)) {
-            return Hub.load(contractAddress.toLowerCase(), web3j(), createCredentials(), new DefaultGasProvider());
+        if (StringUtils.isNotEmpty(hubAddress)) {
+            return Hub.load(hubAddress.toLowerCase(), web3j(), createCredentials(), new DefaultGasProvider());
         } else {
             return Hub.deploy(web3j(), createCredentials(), new DefaultGasProvider()).send();
+        }
+    }
+
+    @Bean
+    public GnosisSafe createGnosisSafe() throws Exception {
+        if (StringUtils.isNotEmpty(contractAddress)) {
+            return GnosisSafe.load(contractAddress.toLowerCase(), web3j(), createCredentials(), new DefaultGasProvider());
+        } else {
+            return GnosisSafe.deploy(web3j(), createCredentials(), new DefaultGasProvider()).send();
         }
     }
 

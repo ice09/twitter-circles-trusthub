@@ -1,14 +1,15 @@
 package tech.blockchainers.circles.twitter.rest.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class SignatureDto {
+@Builder
+public class RegistrationDto {
 
-    private String message;
-    private String signature;
-    private String tweet;
+    private String twitterId;
+    private String ethereumAddress;
 
 }
