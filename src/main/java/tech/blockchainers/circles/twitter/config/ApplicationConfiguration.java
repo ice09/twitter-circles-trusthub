@@ -2,7 +2,6 @@ package tech.blockchainers.circles.twitter.config;
 
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -3,7 +3,6 @@ package tech.blockchainers.circles.twitter.service;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.web3j.crypto.Hash;
 import org.web3j.utils.Numeric;
-import tech.blockchainers.Hub;
 import tech.blockchainers.circles.twitter.persistence.RegistrationRepository;
 import tech.blockchainers.circles.twitter.service.dto.TweetDto;
 import tech.blockchainers.circles.twitter.service.dto.UserDto;
@@ -147,7 +145,6 @@ public class TweetService {
         return response.getBody();
     }
 
-    @NotNull
     private HttpEntity<?> prepareHeader() {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
