@@ -29,10 +29,14 @@ public class IntegrationTest {
     @MockBean
     private RegistrationRepository registrationRepository;
 
-    @Test
+    // This is an integration tests and requires xDai at the address of the private key in the xDai Mainnet
+    //@Test
     public void trustWithSafeOnMainnet() throws Exception {
-        //I AM 0x945CaC6047B1f58945ed2aafA5BaeD96A31faa4c AND WANT 0xA485e9295ef16143891F4A0d77C060E87EA59C87 TO TRUST ME
-        String tweetText = "#circles_twitterhub 0x945CaC6047B1f58945ed2aafA5BaeD96A31faa4c 0x1e3788e96771d41f195ca3542dba25e1fcd9c429db46ebb00ef9e440aea1821f01194d70cd55ad215cf66806495375bd350eefa5e155c5cab92425a9159cc3f91b";
+        // All addresses in message must be lowercase!
+        // Message:
+        // I AM 0x945cac6047b1f58945ed2aafa5baed96a31faa4c AND WANT 0xa485e9295ef16143891f4a0d77c060e87ea59c87 TO TRUST ME
+        String tweetText = "#circles_twitterhub 0x945CaC6047B1f58945ed2aafA5BaeD96A31faa4c 0x1bf09cf255761116cfe3f2d0e343012d9bc31670f79e48b571a5c412d17239ae7bae4a94867a9cffb3bd8f63c070b9318bbe9b65d60db08beeeab2bf1ea8f6781c"
+                .toLowerCase();
         ReflectionTestUtils.setField(tweetService, "registrationRepository", registrationRepository);
         String signerAddress = gnosisSafeOwnerCheck.checkGnosisSafeOwner(tweetService.extractEthereumAddress(tweetText));
         String ethereumAddress = tweetService.handleTweet(tweetText, "user", signerAddress);
