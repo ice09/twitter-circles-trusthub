@@ -1,5 +1,6 @@
 package tech.blockchainers.circles.twitter.service;
 
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
@@ -13,15 +14,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.web3j.crypto.Hash;
+import org.web3j.crypto.Keys;
 import org.web3j.utils.Numeric;
-import tech.blockchainers.circles.twitter.persistence.RegistrationRepository;
+import tech.blockchainers.circles.twitter.persistence.IRegistrationRepository;
+import tech.blockchainers.circles.twitter.persistence.RegistrationContractRepository;
+import tech.blockchainers.circles.twitter.service.dto.TweetContentDto;
 import tech.blockchainers.circles.twitter.service.dto.TweetDto;
 import tech.blockchainers.circles.twitter.service.dto.UserDto;
 
-import java.io.IOException;
+import javax.annotation.PostConstruct;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,15 +47,25 @@ public class TweetService {
     @Value("${trusthub.contract.address}")
     private String trusthubAddress;
 
-    private final SignatureService signatureService;
-    private final RegistrationRepository registrationRepository;
+    private final GnosisSafeOwnerCheck gnosisSafeOwnerCheck;
 
-    public TweetService(SignatureService signatureService, RegistrationRepository registrationRepository) {
+    private final SignatureService signatureService;
+    private final IRegistrationRepository registrationRepository;
+    private final RestTemplate restTemplate;
+
+    public TweetService(GnosisSafeOwnerCheck gnosisSafeOwnerCheck, SignatureService signatureService, RegistrationContractRepository registrationRepository, RestTemplate restTemplate) {
+        this.gnosisSafeOwnerCheck = gnosisSafeOwnerCheck;
         this.signatureService = signatureService;
         this.registrationRepository = registrationRepository;
+        this.restTemplate = restTemplate;
     }
 
-    String handleTweet(String text, String userName, String signerAddress) throws IOException, URISyntaxException {
+    @PostConstruct
+    public void sanitizeEthereumAddress() {
+        this.trusthubAddress = Keys.toChecksumAddress(trusthubAddress);
+    }
+
+    String handleTweet(String text, String userName, String signerAddress) throws Exception {
         if (!isValidMessage(text) || !signatureDoesMatch(text, signerAddress)) {
             return text;
         }
@@ -60,7 +75,7 @@ public class TweetService {
         return ethereumAddress;
     }
 
-    private void storeTwitterUserEthereumAddressLink(String username, String ethereumAddress) {
+    private void storeTwitterUserEthereumAddressLink(String username, String ethereumAddress) throws Exception {
         if (!registrationRepository.isTwitterIdRegistered(username) && !registrationRepository.hasEthereumAddressBeenRegisteredAlready(ethereumAddress)) {
             registrationRepository.linkTwitterIdToEthereumAddress(username, ethereumAddress);
         } else {
@@ -80,7 +95,7 @@ public class TweetService {
         Pattern pattern = Pattern.compile(SIGNATURE_PATTERN);
         Matcher matcher = pattern.matcher(text);
         if (matcher.find()) {
-            String address = matcher.group(1);
+            String address = Keys.toChecksumAddress(matcher.group(1));
             String signature = matcher.group(2);
             String completeMessage = this.message.replaceAll("#addr#", address).replaceAll("#botaddr#", trusthubAddress);
             String recoveredAddress = signatureService.ecrecoverAddress(
@@ -133,10 +148,9 @@ public class TweetService {
         return response.getBody();
     }
 
-    UserDto getUser(String id) throws IOException, URISyntaxException {
+    UserDto getUser(String id) throws URISyntaxException {
         HttpEntity<?> entity = prepareHeader();
         URIBuilder uriBuilder = new URIBuilder("https://api.twitter.com/2/users/" + id);
-        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<UserDto> response =
                 restTemplate.exchange(
                         uriBuilder.build(),
@@ -153,5 +167,16 @@ public class TweetService {
         return entity;
     }
 
-
+    public List<String> extractTrusteeAddresses(List<TweetContentDto> tweets) throws Exception {
+        List<String> trusteeAddresses = Lists.newArrayList();
+        for (TweetContentDto tweet : tweets) {
+            UserDto user = getUser(tweet.getAuthor_id());
+            String signerAddress = gnosisSafeOwnerCheck.checkGnosisSafeOwner(extractEthereumAddress(tweet.getText()));
+            String ethereumAddress = handleTweet(tweet.getText(), user.getData().getUsername(), signerAddress);
+            if (StringUtils.isNotEmpty(gnosisSafeOwnerCheck.checkGnosisSafeOwner(ethereumAddress))) {
+                trusteeAddresses.add(ethereumAddress);
+            }
+        }
+        return trusteeAddresses;
+    }
 }

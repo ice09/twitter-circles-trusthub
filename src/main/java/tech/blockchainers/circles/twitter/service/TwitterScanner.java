@@ -8,6 +8,8 @@ import tech.blockchainers.circles.twitter.service.dto.TweetContentDto;
 import tech.blockchainers.circles.twitter.service.dto.TweetDto;
 import tech.blockchainers.circles.twitter.service.dto.UserDto;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class TwitterScanner {
@@ -29,13 +31,10 @@ public class TwitterScanner {
         TweetDto response = tweetService.getTweets();
         if (response != null) {
             log.info(response.toString());
-            for (TweetContentDto tweet : response.getData()) {
-                UserDto user = tweetService.getUser(tweet.getAuthor_id());
-                String signerAddress = gnosisSafeOwnerCheck.checkGnosisSafeOwner(tweetService.extractEthereumAddress(tweet.getText()));
-                String ethereumAddress = tweetService.handleTweet(tweet.getText(), user.getData().getUsername(), signerAddress);
-                if (StringUtils.hasText(gnosisSafeOwnerCheck.checkGnosisSafeOwner(ethereumAddress))) {
-                    trustVerifiedUserService.giveTrustToEthereumAddress(ethereumAddress);
-                }
+            List<String> trusteeAddresses = tweetService.extractTrusteeAddresses(response.getData());
+            for (String trusteeAddress : trusteeAddresses) {
+                log.info("trust address: {}", trusteeAddress);
+                trustVerifiedUserService.giveTrustToEthereumAddress(trusteeAddress);
             }
         }
     }

@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 import java.util.concurrent.ConcurrentMap;
 
 @Service
-public class RegistrationRepository {
+public class RegistrationMapRepository implements IRegistrationRepository {
     private DB db;
     private ConcurrentMap twitterRegistrations;
     @Value("${repository.file}")
@@ -31,6 +31,7 @@ public class RegistrationRepository {
         return twitterRegistrations;
     }
 
+    @Override
     public void linkTwitterIdToEthereumAddress(String twitterId, String ethereumAddress) {
         if (twitterRegistrations.containsKey(twitterId)) {
             throw new IllegalArgumentException("Twitter ID " + twitterId + " does already exist: " + twitterRegistrations.get(twitterId));
@@ -42,18 +43,22 @@ public class RegistrationRepository {
         db.commit();
     }
 
+    @Override
     public String getTwitterAddressForEthereumAddress(String ethereumAddress) {
         return (String) twitterRegistrations.get(ethereumAddress);
     }
 
+    @Override
     public String getEthereumAddressForTwitterUsername(String ethereumAddress) {
         return (String) twitterRegistrations.entrySet().stream().filter(it -> it.equals(ethereumAddress)).findAny().get();
     }
 
+    @Override
     public boolean isTwitterIdRegistered(String twitterId) {
         return twitterRegistrations.containsKey(twitterId);
     }
 
+    @Override
     public boolean hasEthereumAddressBeenRegisteredAlready(String ethereumAddress) {
         return twitterRegistrations.containsValue(ethereumAddress);
     }

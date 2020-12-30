@@ -145,7 +145,7 @@
                             <packageName>tech.blockchainers</packageName>
                             <sourceDestination>${basedir}/target/generated-sources/solidity</sourceDestination>
                             <nativeJavaType>true</nativeJavaType>
-                            <outputFormat>java,bin</outputFormat>
+                            <outputFormat>java</outputFormat>
                             <soliditySourceFiles>
                                 <directory>src/main/resources</directory>
                                 <includes>
