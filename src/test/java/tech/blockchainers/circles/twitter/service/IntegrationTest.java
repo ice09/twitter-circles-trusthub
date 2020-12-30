@@ -45,7 +45,7 @@ public class IntegrationTest {
     private RegistrationMapRepository registrationMapRepository;
 
     // This is an integration tests and requires xDai at the address of the private key in the xDai Mainnet
-    @Test
+    //@Test
     public void trustWithSafeOnMainnet() throws Exception {
         // Message:
         // I AM 0xC29D7Ab348b2dA3B59eE80A8492bEDFaDf350AEF AND WANT 0xA485e9295ef16143891F4A0d77C060E87EA59C87 TO TRUST ME
