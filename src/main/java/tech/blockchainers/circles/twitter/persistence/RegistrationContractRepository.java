@@ -1,6 +1,7 @@
 package tech.blockchainers.circles.twitter.persistence;
 
 import org.springframework.stereotype.Service;
+import org.web3j.crypto.Hash;
 import tech.blockchainers.TrusthubRegistry;
 
 import java.nio.charset.StandardCharsets;
@@ -25,12 +26,12 @@ public class RegistrationContractRepository implements IRegistrationRepository {
 
     @Override
     public String getEthereumAddressForTwitterUsername(String twitterId) throws Exception {
-        return trusthubRegistry.userRegistry(twitterId.getBytes(StandardCharsets.UTF_8)).send().toString();
+        return trusthubRegistry.userRegistry(Hash.sha3(twitterId.getBytes(StandardCharsets.UTF_8))).send().toString();
     }
 
     @Override
     public boolean isTwitterIdRegistered(String twitterId) throws Exception {
-        return trusthubRegistry.userRegistry(twitterId.getBytes(StandardCharsets.UTF_8)).send();
+        return trusthubRegistry.userRegistry(Hash.sha3(twitterId.getBytes(StandardCharsets.UTF_8))).send();
     }
 
     @Override

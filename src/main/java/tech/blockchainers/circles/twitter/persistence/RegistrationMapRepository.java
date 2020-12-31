@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.ConcurrentMap;
 
-@Service
+//@Service // deactivated for smart contract solution
 public class RegistrationMapRepository implements IRegistrationRepository {
     private DB db;
     private ConcurrentMap twitterRegistrations;

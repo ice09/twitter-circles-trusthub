@@ -52,15 +52,21 @@ public class IntegrationTest {
         String tweetText = "#circles_trusthub 0xC29D7Ab348b2dA3B59eE80A8492bEDFaDf350AEF 0xd52661224f30fa27f622de66c9f1e6fe53d0c89248ec805fd3966d3411becf142203a10c81f7a349135706ce6c35cf12ca629fc1baf6dacc804114ec0424cfef1b";
 
         RestTemplate mockTemplate = Mockito.mock(RestTemplate.class);
-        UserDto userDto = UserDto.builder().data(UserContentDto.builder().id("customer").build()).build();
-        ResponseEntity<UserDto> resp = new ResponseEntity<UserDto>(userDto, HttpStatus.ACCEPTED);
+        UserDto userDto = new UserDto();
+        UserContentDto userContentDto = new UserContentDto();
+        userContentDto.setId("customer");
+        userDto.setData(userContentDto);
+        ResponseEntity<UserDto> resp = new ResponseEntity<>(userDto, HttpStatus.ACCEPTED);
         when(mockTemplate.exchange(any(URI.class), any(HttpMethod.class), any(HttpEntity.class), ArgumentMatchers.<Class<UserDto>>any())).thenReturn(resp);
 
         ReflectionTestUtils.setField(tweetService, "registrationRepository", registrationMapRepository);
         ReflectionTestUtils.setField(tweetService, "restTemplate", mockTemplate);
         //String signerAddress = gnosisSafeOwnerCheck.checkGnosisSafeOwner(tweetService.extractEthereumAddress(tweetText));
         List<TweetContentDto> tweets = Lists.newArrayList();
-        tweets.add(TweetContentDto.builder().text(tweetText).author_id("customer").build());
+        TweetContentDto tweetContentDto = new TweetContentDto();
+        tweetContentDto.setText(tweetText);
+        tweetContentDto.setAuthor_id("customer");
+        tweets.add(tweetContentDto);
         List<String> trusteeAddresses = tweetService.extractTrusteeAddresses(tweets);
         for (String trusteeAddress : trusteeAddresses) {
             String trxHash = trustVerifiedUserService.giveTrustToEthereumAddress(trusteeAddress);
